@@ -19,6 +19,7 @@ contract Wallet {
     
     mapping(address => mapping(uint => bool)) approvals;
     
+    
     //Should only allow people in the owners list to continue the execution.
     modifier onlyOwners(){
         bool owners = false;
