@@ -60,7 +60,7 @@ contract Wallet {
  
         approvals[msg.sender][_id] = true;
         transferRequests[_id].approvals++;
-
+        
 
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
