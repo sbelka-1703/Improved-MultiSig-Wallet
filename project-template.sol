@@ -1,8 +1,16 @@
-//Attempt 2
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
+//["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2","0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c"]
+
+
 contract Wallet {
+    
+     constructor(address[] memory _owners, uint _limit) {
+        owners = _owners;
+        limit = _limit;
+    }
+    
    
     address[] public owners;
     uint limit;
@@ -17,50 +25,43 @@ contract Wallet {
     
     Transfer[] transferRequests;
     
+    
+    
     mapping(address => mapping(uint => bool)) approvals;
     mapping(address => uint) balance; 
     
-    //Should only allow people in the owners list to continue the execution.
+    
     modifier onlyOwners(){
-        bool owners = false;
+        bool owner = false;
 
-        for(uint i = 0; i <= owners.length; i++){
+        for(uint i = 0; i < owners.length; i++){
             if (owners[i] == msg.sender){
-                owners = true;
+                owner = true;
             }
         }
 
-        require(owners == true);
+        require(owner == true);
         _;
     }
-    //Should initialize the owners list and the limit 
-    constructor(address[] memory _owners, uint _limit) {
-        owners = _owners;
-        limit = _limit;
-    }
-    
-    function getBalance(address _address) public returns(uint){
-        return balance(_address);
-    }
+   
+   
+    // function getBalance(address _address) public returns(uint){
+    //     return balance(_address);
+    // }
 
     //needs to update balance
     function deposit() public payable {
         // balance[?] + msg.value
     }
     
-    //Create an instance of the Transfer struct and add it to the transferRequests array
+   
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
 
-        transferRequests.push(Transfer(_amount, _receiver, 0, false, transferRequest.lenght));
+        transferRequests.push(Transfer(_amount, _receiver, 0, false, transferRequests.length));
         
     }
     
-    //Set your approval for one of the transfer requests.
-    //Need to update the Transfer object.
-    //Need to update the mapping to record the approval for the msg.sender.
-    //When the amount of approvals for a transfer has reached the limit, this function should send the transfer to the recipient.
-    //An owner should not be able to vote twice.
-    //An owner should not be able to vote on a tranfer request that has already been sent.
+    
     function approve(uint _id) public onlyOwners {
         require(approvals[msg.sender][_id] == false);
         require(transferRequests[_id].hasBeenSent == false);
@@ -71,14 +72,15 @@ contract Wallet {
 
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
-            transferRequests[_id].reciver.transfer(transferRequests[_id].amount);
+            transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
         }
 
 
     }
     
-    //Should return all transfer requests
     function getTransferRequests() public view returns (Transfer[] memory){
         transferRequests;
+
+}
 
 }
