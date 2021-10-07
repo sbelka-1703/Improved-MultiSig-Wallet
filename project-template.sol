@@ -1,19 +1,47 @@
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
-//["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2","0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c"]
 
+//["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2","0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c"]
 
 contract Wallet {
     
      constructor(address[] memory _owners, uint _limit) {
+         
         owners = _owners;
         limit = _limit;
+        
+       
+       bool duplicate = false;
+       //nested loop to check for duplicate addresses 
+       for(uint i = 0; i < owners.length;i++) {
+         for(uint j = 0; j < owners.length;j++) {
+            if(i != j) {
+            if(owners[i] == owners[j]){
+                duplicate = true;
+             break;
+        }
+            }
+         }
+         if(duplicate){
+            break;
+         }
+        else{
+         duplicate = false;
+            }
+      }
+          
+      
+      require(duplicate == false, 'Duplicate addresses entered, every address has to be unique!');
+      
+         
     }
     
    
     address[] public owners;
     uint limit;
+    
+    uint totalContractBalance = 0;
     
     struct Transfer{
         uint amount;
@@ -45,17 +73,18 @@ contract Wallet {
     }
    
    
-    // function getBalance(address _address) public returns(uint){
-    //     return balance(_address);
-    // }
+    function getBalance() public view returns(uint){
+        return totalContractBalance;
+    }
 
-    //needs to update balance
-    function deposit() public payable {
-        // balance[?] + msg.value
+  
+    function deposit() public payable  {
+        totalContractBalance = totalContractBalance + msg.value;
     }
     
    
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
+        require(_amount <= totalContractBalance, "Insufficent balance, try lower amount");
 
         transferRequests.push(Transfer(_amount, _receiver, 0, false, transferRequests.length));
         
@@ -65,6 +94,7 @@ contract Wallet {
     function approve(uint _id) public onlyOwners {
         require(approvals[msg.sender][_id] == false);
         require(transferRequests[_id].hasBeenSent == false);
+        
  
         approvals[msg.sender][_id] = true;
         transferRequests[_id].approvals++;
@@ -73,6 +103,7 @@ contract Wallet {
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
             transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
+            totalContractBalance - transferRequests[_id].amount;
         }
 
 
