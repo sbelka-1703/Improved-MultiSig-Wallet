@@ -18,7 +18,7 @@ contract Wallet {
     Transfer[] transferRequests;
     
     mapping(address => mapping(uint => bool)) approvals;
-    
+    mapping(address => uint) balance; 
     
     //Should only allow people in the owners list to continue the execution.
     modifier onlyOwners(){
@@ -39,8 +39,14 @@ contract Wallet {
         limit = _limit;
     }
     
-    //Empty function
-    function deposit() public payable {}
+    function getBalance(address _address) public returns(uint){
+        return balance(_address);
+    }
+
+    //needs to update balance
+    function deposit() public payable {
+        // balance[?] + msg.value
+    }
     
     //Create an instance of the Transfer struct and add it to the transferRequests array
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
