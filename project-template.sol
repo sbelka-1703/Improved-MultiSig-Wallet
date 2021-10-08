@@ -104,14 +104,14 @@ contract Wallet {
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
             transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
-            totalContractBalance -transferRequests[_id].amount;
+            totalContractBalance = totalContractBalance - transferRequests[_id].amount;
         }
 
 
     }
     
     function getTransferRequests() public view returns (Transfer[] memory){
-        transferRequests;
+       return transferRequests;
 
 }
 
