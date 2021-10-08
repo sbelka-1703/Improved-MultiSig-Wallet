@@ -74,7 +74,8 @@ contract Wallet {
    
    
     function getBalance() public view returns(uint){
-        return totalContractBalance;
+        
+        return totalContractBalance / 1e18;
     }
 
   
@@ -84,9 +85,9 @@ contract Wallet {
     
    
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
-        require(_amount <= totalContractBalance, "Insufficent balance, try lower amount");
+        require(_amount*1e18 <= totalContractBalance, "Insufficent balance, try lower amount");
 
-        transferRequests.push(Transfer(_amount, _receiver, 0, false, transferRequests.length));
+        transferRequests.push(Transfer(_amount*1e18, _receiver, 0, false, transferRequests.length));
         
     }
     
@@ -103,7 +104,7 @@ contract Wallet {
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
             transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
-            totalContractBalance - transferRequests[_id].amount;
+            totalContractBalance -transferRequests[_id].amount;
         }
 
 
