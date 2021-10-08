@@ -50,7 +50,11 @@ contract Wallet {
         bool hasBeenSent;
         uint id;
     }
-    
+
+    event TransferRequestCreated(uint _id, uint _amount, address _initiator, address _receiver);
+    event ApprovalReceived(uint _id, uint _approvals, address _approver);
+    event TransferApproved(uint _id);
+
     Transfer[] transferRequests;
     
     
@@ -87,7 +91,11 @@ contract Wallet {
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
         require(_amount*1e18 <= totalContractBalance, "Insufficent balance, try lower amount");
 
+        emit TransferRequestCreated(transferRequests.length, _amount, msg.sender, _receiver); 
+
         transferRequests.push(Transfer(_amount*1e18, _receiver, 0, false, transferRequests.length));
+
+        
         
     }
     
@@ -95,16 +103,21 @@ contract Wallet {
     function approve(uint _id) public onlyOwners {
         require(approvals[msg.sender][_id] == false);
         require(transferRequests[_id].hasBeenSent == false);
+
         
  
         approvals[msg.sender][_id] = true;
         transferRequests[_id].approvals++;
+
+        emit ApprovalReceived(_id, transferRequests[_id].approvals, msg.sender);
+
         
 
         if(limit <= transferRequests[_id].approvals){
             transferRequests[_id].hasBeenSent = true;
             transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
             totalContractBalance = totalContractBalance - transferRequests[_id].amount;
+            emit TransferApproved(_id);
         }
 
 
